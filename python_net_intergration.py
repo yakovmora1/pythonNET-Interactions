@@ -9,12 +9,16 @@ import clr
     and make them available in the Python runtime.
 """
 from System.Collections.Generic import Dictionary
+from System import Int32
+from System.Reflection import BindingFlags
 
 
 
 def call_net_func():
+    #Add Aseembly TestLib.dll
     clr.AddReference("TestLib")
 
+    #import from our library in the dll
     from TestLib import SecretOpCaller, SecretOp
     
     sec_op_obj = SecretOp(1337, 33)
@@ -57,5 +61,43 @@ def call_net_func():
 
     print(f"The SecOpCaller result is : {result}")
 
+
+def invoke_private_method(privat_method_name):
+    #Add Aseembly TestLib.dll (we get a RuntimeAssembly Claass from Reflection)
+    library = clr.AddReference("TestLib")
+
+    from TestLib import SecretOp
+
+    # Get the type object of the SecretOp class
+    secretop_type = library.GetType("TestLib.SecretOp")
+    #search for instace and private methods in the current Type
+    methods = secretop_type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance)
+
+    for method in methods:
+        print(f"NonPublic Method: {method.Name}")
+
+    #get the RuntimeMethodInfo object
+    get_secret_val_method = secretop_type.GetMethod(privat_method_name, BindingFlags.NonPublic | BindingFlags.Instance)
+    if get_secret_val_method == None:
+        # We didn't find our private method
+        raise TypeError(f"Method  {privat_method_name} not found!")
+
+    print(f"Is {privat_method_name} is private: {get_secret_val_method.IsPrivate}") 
+
+    # show its parameters
+    parameters = get_secret_val_method.GetParameters()
+    for param in parameters:
+        print(f"Parameter {param.Position} name: {param.Name} , type: {param.ParameterType}")
+
+    sec_op_instance = SecretOp(5, 5)
+
+    #We can pass array argument as python array (it works)
+    result = get_secret_val_method.Invoke(sec_op_instance, [Int32(555)])
+
+    print(f"{privat_method_name} result is: {result}")
+
+
+
 if __name__ == "__main__":
-    call_net_func()
+    #call_net_func()
+    invoke_private_method("getSecretValue")

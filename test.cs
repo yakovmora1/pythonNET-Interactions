@@ -9,17 +9,22 @@ namespace TestLib
         private int internalVal1 = 1;
         private int internalVal2 = 1;
 
-        public  void Main(string[] args)
-        {
-            Console.WriteLine ("Hello Mono World");
-        }
-
         public  SecretOp(int newVal1, int newVal2)
         {
             internalVal1 = newVal1;
             internalVal1 = newVal2;
         }
-        
+
+        private int getSecretValue(int tempInput)
+        {
+            return 1337 + tempInput;
+        }
+
+        private void computeOnString(String input)
+        {
+            Console.WriteLine("The input is " + input);
+        }
+
         public int computeInternal()
         {
             int temp = 0;
